@@ -1,4 +1,4 @@
-version stripped of cruft and git history for easy speed...building ffmpeg that is...
+version stripped of cruft and git history for easy speed...building ffmpeg that is...forked from https://github.com/GPUOpen-LibrariesAndSDKs/AMF but waaay smaller ;) (or  https://github.com/DeadSix27/AMF is another option)
 
 # Advanced Media Framework (AMF) SDK
 
