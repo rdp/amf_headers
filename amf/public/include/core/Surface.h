@@ -9,7 +9,7 @@
 // 
 // MIT license 
 // 
-// Copyright (c) 2016 Advanced Micro Devices, Inc. All rights reserved.
+// Copyright (c) 2018 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -46,25 +46,47 @@
 namespace amf
 {
 #endif
+    //----------------------------------------------------------------------------------------------
     typedef enum AMF_SURFACE_FORMAT
     {
         AMF_SURFACE_UNKNOWN     = 0,
-        AMF_SURFACE_NV12,               ///< 1 - planar Y width x height + packed UV width/2 x height/2 - 8 bit per component
-        AMF_SURFACE_YV12,               ///< 2 - planar Y width x height + V width/2 x height/2 + U width/2 x height/2 - 8 bit per component
-        AMF_SURFACE_BGRA,               ///< 3 - packed - 8 bit per component
-        AMF_SURFACE_ARGB,               ///< 4 - packed - 8 bit per component
-        AMF_SURFACE_RGBA,               ///< 5 - packed - 8 bit per component
-        AMF_SURFACE_GRAY8,              ///< 6 - single component - 8 bit
-        AMF_SURFACE_YUV420P,            ///< 7 - planar Y width x height + U width/2 x height/2 + V width/2 x height/2 - 8 bit per component
-        AMF_SURFACE_U8V8,               ///< 8 - double component - 8 bit per component
-        AMF_SURFACE_YUY2,               ///< 9 - YUY2: Byte 0=8-bit Y'0; Byte 1=8-bit Cb; Byte 2=8-bit Y'1; Byte 3=8-bit Cr
-        AMF_SURFACE_P010,               ///< 10- planar Y width x height + packed UV width/2 x height/2 - 10 bit per component (16 allocated, upper 10 bits are used)
-        AMF_SURFACE_RGBA_F16,           ///< 11 - packed - 16 bit per component float
-        AMF_SURFACE_UYVY,               ///< 12 - the similar to YUY2 but Y and UV swapped: Byte 0=8-bit Cb; Byte 1=8-bit Y'0; Byte 2=8-bit Cr Byte 3=8-bit Y'1; (used the same DX/CL/Vulkan storage as YUY2)
+        AMF_SURFACE_NV12,               ///< 1  - planar 4:2:0 Y width x height + packed UV width/2 x height/2 - 8 bit per component
+        AMF_SURFACE_YV12,               ///< 2  - planar 4:2:0 Y width x height + V width/2 x height/2 + U width/2 x height/2 - 8 bit per component
+        AMF_SURFACE_BGRA,               ///< 3  - packed 4:4:4 - 8 bit per component
+        AMF_SURFACE_ARGB,               ///< 4  - packed 4:4:4 - 8 bit per component
+        AMF_SURFACE_RGBA,               ///< 5  - packed 4:4:4 - 8 bit per component
+        AMF_SURFACE_GRAY8,              ///< 6  - single component - 8 bit
+        AMF_SURFACE_YUV420P,            ///< 7  - planar 4:2:0 Y width x height + U width/2 x height/2 + V width/2 x height/2 - 8 bit per component
+        AMF_SURFACE_U8V8,               ///< 8  - packed double component - 8 bit per component
+        AMF_SURFACE_YUY2,               ///< 9  - packed 4:2:2 Byte 0=8-bit Y'0; Byte 1=8-bit Cb; Byte 2=8-bit Y'1; Byte 3=8-bit Cr
+        AMF_SURFACE_P010,               ///< 10 - planar 4:2:0 Y width x height + packed UV width/2 x height/2 - 10 bit per component (16 allocated, upper 10 bits are used)
+        AMF_SURFACE_RGBA_F16,           ///< 11 - packed 4:4:4 - 16 bit per component float
+        AMF_SURFACE_UYVY,               ///< 12 - packed 4:2:2 the similar to YUY2 but Y and UV swapped: Byte 0=8-bit Cb; Byte 1=8-bit Y'0; Byte 2=8-bit Cr Byte 3=8-bit Y'1; (used the same DX/CL/Vulkan storage as YUY2)
+        AMF_SURFACE_R10G10B10A2,        ///< 13 - packed 4:4:4 to 4 bytes, 10 bit per RGB component, 2 bits per A 
+        AMF_SURFACE_Y210,               ///< 14 - packed 4:2:2 - Word 0=10-bit Y'0; Word 1=10-bit Cb; Word 2=10-bit Y'1; Word 3=10-bit Cr
+        AMF_SURFACE_AYUV,               ///< 15 - packed 4:4:4 - 8 bit per component YUVA
+        AMF_SURFACE_Y410,               ///< 16 - packed 4:4:4 - 10 bit per YUV component, 2 bits per A, AVYU 
+        AMF_SURFACE_Y416,               ///< 16 - packed 4:4:4 - 16 bit per component 4 bytes, AVYU
 
         AMF_SURFACE_FIRST = AMF_SURFACE_NV12,
-        AMF_SURFACE_LAST = AMF_SURFACE_RGBA_F16
+        AMF_SURFACE_LAST = AMF_SURFACE_Y416
     } AMF_SURFACE_FORMAT;
+    //----------------------------------------------------------------------------------------------
+    // AMF_SURFACE_USAGE translates to D3D11_BIND_FLAG or VkImageUsageFlags
+    // bit mask
+    //----------------------------------------------------------------------------------------------
+    typedef enum AMF_SURFACE_USAGE_BITS
+    {                                                       // D3D11                        Vulkan 
+        AMF_SURFACE_USAGE_DEFAULT           = 0x80000000,   // will apply default           VK_IMAGE_USAGE_TRANSFER_SRC_BIT| VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT
+        AMF_SURFACE_USAGE_NONE              = 0x00000000,   // 0,                           , 0
+        AMF_SURFACE_USAGE_SHADER_RESOURCE   = 0x00000001,   // D3D11_BIND_SHADER_RESOURCE,  VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT
+        AMF_SURFACE_USAGE_RENDER_TARGET     = 0x00000002,   // D3D11_BIND_RENDER_TARGET,    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
+        AMF_SURFACE_USAGE_UNORDERED_ACCESS  = 0x00000004,   // D3D11_BIND_UNORDERED_ACCESS, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT
+        AMF_SURFACE_USAGE_TRANSFER_SRC      = 0x00000008,   //                              VK_IMAGE_USAGE_TRANSFER_SRC_BIT
+        AMF_SURFACE_USAGE_TRANSFER_DST      = 0x00000010,   //                              VK_IMAGE_USAGE_TRANSFER_DST_BIT
+    } AMF_SURFACE_USAGE_BITS;
+    typedef amf_flags AMF_SURFACE_USAGE;
+    //----------------------------------------------------------------------------------------------
 
 #if defined(_WIN32)
     AMF_WEAK GUID  AMFFormatGUID = { 0x8cd592d0, 0x8063, 0x4af8, 0xa7, 0xd0, 0x32, 0x5b, 0xc5, 0xf7, 0x48, 0xab}; // UINT(AMF_SURFACE_FORMAT), default - AMF_SURFACE_UNKNOWN; to be set on ID3D11Texture2D objects when used natively (i.e. force UYVY on DXGI_FORMAT_YUY2 texture)

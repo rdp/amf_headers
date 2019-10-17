@@ -9,7 +9,7 @@
 // 
 // MIT license 
 // 
-// Copyright (c) 2016 Advanced Micro Devices, Inc. All rights reserved.
+// Copyright (c) 2018 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -74,6 +74,7 @@ namespace amf
         AMF_CHANNEL_FLOAT               = 6,
         AMF_CHANNEL_FLOAT16             = 7,
         AMF_CHANNEL_UNSIGNED_INT16      = 8,
+        AMF_CHANNEL_UNORM_INT_101010    = 9,
 } AMF_CHANNEL_TYPE;
     //----------------------------------------------------------------------------------------------
 #define AMF_STRUCTURED_BUFFER_FORMAT        L"StructuredBufferFormat"                                                             // amf_int64(AMF_CHANNEL_TYPE), default - AMF_CHANNEL_UNSIGNED_INT32; to be set on AMFBuffer objects
@@ -90,9 +91,9 @@ namespace amf
         AMF_ARGUMENT_ACCESS_READWRITE   = 2,
         AMF_ARGUMENT_ACCESS_READWRITE_MASK  = 0xFFFF,
         //Sampler parameters
-        AMF_ARGUMENT_SAMPLER_POINT         = 0x00000000, // default
         AMF_ARGUMENT_SAMPLER_LINEAR        = 0x10000000, 
         AMF_ARGUMENT_SAMPLER_NORM_COORD    = 0x20000000, 
+        AMF_ARGUMENT_SAMPLER_POINT         = 0x40000000,
         AMF_ARGUMENT_SAMPLER_MASK          = 0xFFFF0000,
     } AMF_ARGUMENT_ACCESS_TYPE;
     //----------------------------------------------------------------------------------------------

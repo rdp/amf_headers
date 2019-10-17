@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016 Advanced Micro Devices, Inc. All rights reserved.
+// Copyright (c) 2018 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@
 #pragma once
 
 #include "Component.h"
+#include "ColorSpace.h"
 
 #define AMFVideoEncoder_HEVC L"AMFVideoEncoderHW_HEVC"
 
@@ -121,9 +122,10 @@ enum AMF_VIDEO_ENCODER_HEVC_HEADER_INSERTION_MODE_ENUM
 #define AMF_VIDEO_ENCODER_HEVC_QUALITY_PRESET                       L"HevcQualityPreset"            // amf_int64(AMF_VIDEO_ENCODER_HEVC_QUALITY_PRESET_ENUM); default = depends on USAGE; Quality Preset 
 #define AMF_VIDEO_ENCODER_HEVC_EXTRADATA                            L"HevcExtraData"                // AMFInterface* - > AMFBuffer*; SPS/PPS buffer - read-only
 #define AMF_VIDEO_ENCODER_HEVC_ASPECT_RATIO                         L"HevcAspectRatio"              // AMFRatio; default = 1, 1
+#define AMF_VIDEO_ENCODER_HEVC_LOWLATENCY_MODE					    L"LowLatencyInternal"           // bool; default = false, enables low latency mode
 
 // Picture control properties
-#define AMF_VIDEO_ENCODER_HEVC_NUM_GOPS_PER_IDR                     L"HevcGOPSPerIDR"               // amf_int64; default = 60; The frequency to insert IDR as start of a GOP. 0 means no IDR will be inserted.
+#define AMF_VIDEO_ENCODER_HEVC_NUM_GOPS_PER_IDR                     L"HevcGOPSPerIDR"               // amf_int64; default = 1; The frequency to insert IDR as start of a GOP. 0 means no IDR will be inserted.
 #define AMF_VIDEO_ENCODER_HEVC_GOP_SIZE                             L"HevcGOPSize"                  // amf_int64; default = 60; GOP Size, in frames
 #define AMF_VIDEO_ENCODER_HEVC_DE_BLOCKING_FILTER_DISABLE           L"HevcDeBlockingFilter"         // bool; default = depends on USAGE; De-blocking Filter
 #define AMF_VIDEO_ENCODER_HEVC_SLICES_PER_FRAME                     L"HevcSlicesPerFrame"           // amf_int64; default = 1; Number of slices Per Frame 
@@ -136,10 +138,18 @@ enum AMF_VIDEO_ENCODER_HEVC_HEADER_INSERTION_MODE_ENUM
 #define AMF_VIDEO_ENCODER_HEVC_INITIAL_VBV_BUFFER_FULLNESS          L"HevcInitialVBVBufferFullness" // amf_int64; default =  64; Initial VBV Buffer Fullness 0=0% 64=100%
 #define AMF_VIDEO_ENCODER_HEVC_RATE_CONTROL_PREANALYSIS_ENABLE      L"HevcRateControlPreAnalysisEnable"  // bool; default =  depends on USAGE; enable Pre-analysis assisted rate control 
 #define AMF_VIDEO_ENCODER_HEVC_ENABLE_VBAQ                          L"HevcEnableVBAQ"               // // bool; default = depends on USAGE; Enable auto VBAQ
+#define AMF_VIDEO_ENCODER_HEVC_HIGH_MOTION_QUALITY_BOOST_ENABLE     L"HevcHighMotionQualityBoostEnable"// bool; default = depends on USAGE; Enable High motion quality boost mode
 
 // Motion estimation
 #define AMF_VIDEO_ENCODER_HEVC_MOTION_HALF_PIXEL                    L"HevcHalfPixel"                // bool; default= true; Half Pixel 
 #define AMF_VIDEO_ENCODER_HEVC_MOTION_QUARTERPIXEL                  L"HevcQuarterPixel"             // bool; default= true; Quarter Pixel
+
+// color conversion
+#define AMF_VIDEO_ENCODER_HEVC_COLOR_BIT_DEPTH                      L"HevcColorBitDepth"            // amf_int64(AMF_COLOR_BIT_DEPTH_ENUM); default = AMF_COLOR_BIT_DEPTH_8
+#define AMF_VIDEO_ENCODER_HEVC_INPUT_COLOR_PROFILE                  L"HevcInColorProfile"             // amf_int64(AMF_VIDEO_CONVERTER_COLOR_PROFILE_ENUM); default = AMF_VIDEO_CONVERTER_COLOR_PROFILE_UNKNOWN - mean AUTO by size
+#define AMF_VIDEO_ENCODER_HEVC_OUTPUT_COLOR_PROFILE                 L"HevcOutColorProfile"             // amf_int64(AMF_VIDEO_CONVERTER_COLOR_PROFILE_ENUM); default = AMF_VIDEO_CONVERTER_COLOR_PROFILE_UNKNOWN - mean AUTO by size
+#define AMF_VIDEO_ENCODER_HEVC_INPUT_TRANSFER_CHARACTERISTIC        L"HevcInColorTransferChar"        // amf_int64(AMF_COLOR_TRANSFER_CHARACTERISTIC_ENUM); default = AMF_COLOR_TRANSFER_CHARACTERISTIC_UNDEFINED, ISO/IEC 23001-8_2013 § 7.2 See VideoDecoderUVD.h for enum 
+#define AMF_VIDEO_ENCODER_HEVC_OUTPUT_TRANSFER_CHARACTERISTIC       L"HevcOutColorTransferChar"        // amf_int64(AMF_COLOR_TRANSFER_CHARACTERISTIC_ENUM); default = AMF_COLOR_TRANSFER_CHARACTERISTIC_UNDEFINED, ISO/IEC 23001-8_2013 § 7.2 See VideoDecoderUVD.h for enum 
 
 // Dynamic properties - can be set at any time
 
@@ -161,7 +171,9 @@ enum AMF_VIDEO_ENCODER_HEVC_HEADER_INSERTION_MODE_ENUM
 
 #define AMF_VIDEO_ENCODER_HEVC_RATE_CONTROL_SKIP_FRAME_ENABLE       L"HevcRateControlSkipFrameEnable" // bool; default =  depends on USAGE; Rate Control Based Frame Skip 
 
-
+// color conversion
+#define AMF_VIDEO_ENCODER_HEVC_INPUT_HDR_METADATA                   L"HevcInHDRMetadata"             // AMFBuffer containing AMFHDRMetadata; default NULL
+#define AMF_VIDEO_ENCODER_HEVC_OUTPUT_HDR_METADATA                  L"HevcOutHDRMetadata"            // AMFBuffer containing AMFHDRMetadata; default NULL
 
 // Per-submittion properties - can be set on input surface interface
 #define AMF_VIDEO_ENCODER_HEVC_END_OF_SEQUENCE                      L"HevcEndOfSequence"            // bool; default = false; generate end of sequence
@@ -185,6 +197,9 @@ enum AMF_VIDEO_ENCODER_HEVC_HEADER_INSERTION_MODE_ENUM
 #define AMF_VIDEO_ENCODER_HEVC_CAP_MAX_LEVEL                        L"HevcMaxLevel"                 // amf_int64 maximum profile level
 #define AMF_VIDEO_ENCODER_HEVC_CAP_MIN_REFERENCE_FRAMES             L"HevcMinReferenceFrames"       // amf_int64 minimum number of reference frames
 #define AMF_VIDEO_ENCODER_HEVC_CAP_MAX_REFERENCE_FRAMES             L"HevcMaxReferenceFrames"       // amf_int64 maximum number of reference frames
+#define AMF_VIDEO_ENCODER_HEVC_CAP_COLOR_CONVERSION                 L"HevcColorConversion"          // amf_int64(AMF_ACCELERATION_TYPE) - type of supported color conversion. default AMF_ACCEL_GPU
 
+// properties set on AMFComponent to control component creation
+#define AMF_VIDEO_ENCODER_HEVC_MEMORY_TYPE                          L"HevcEncoderMemoryType"        // amf_int64(AMF_MEMORY_TYPE) , default is AMF_MEMORY_UNKNOWN, Values : AMF_MEMORY_DX11, AMF_MEMORY_DX9, AMF_MEMORY_UNKNOWN (auto)
 
 #endif //#ifndef AMF_VideoEncoderHEVC_h

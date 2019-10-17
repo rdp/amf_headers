@@ -9,7 +9,7 @@
 // 
 // MIT license 
 // 
-// Copyright (c) 2016 Advanced Micro Devices, Inc. All rights reserved.
+// Copyright (c) 2018 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -57,6 +57,7 @@
 
 // video stream properties
 #define FFMPEG_DEMUXER_VIDEO_PIXEL_ASPECT_RATIO L"PixelAspectRatio"         // double (default = calculated)
+#define FFMPEG_DEMUXER_VIDEO_CODEC              L"FFmpegCodec"              // enum (from source)
 
 
 // buffer properties
